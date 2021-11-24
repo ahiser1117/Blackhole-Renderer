@@ -3,12 +3,11 @@
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 #include <stdio.h>
+#include <math.h>
 
 
 const int SCREEN_WIDTH = 512;
 const int SCREEN_HEIGHT = 512;
-
-
 
 typedef struct Vec3f {
 	float x;
@@ -18,6 +17,7 @@ typedef struct Vec3f {
 
 typedef struct Poly {
 	Vec3f_t vertices[3];
+	char rgb[3];
 } Poly_t;
 
 typedef struct Object {
@@ -32,14 +32,16 @@ SDL_Renderer* gRenderer = NULL;
 Vec3f_t* cameraPos;
 Vec3f_t* cameraDir;
 
-float near = 0.1;
-
+float near = 1;
+float scale = 1;
 
 bool init();
 
 void close();
 
 void renderObject(Object_t* object);
+void rotateZAxis(Object_t* object, float theta);
+float edgeFunction(const Vec3f_t& a, const Vec3f_t& b, const Vec3f_t& c);
 
 
 int main(int argc, char** argv)
@@ -47,10 +49,56 @@ int main(int argc, char** argv)
 
 	Object_t* object1 = (Object_t*)malloc(sizeof(Object_t));
 
-	object1->size = 12;
+	object1->size = 6;
 	object1->tris = (Poly_t*)malloc(sizeof(Poly_t) * object1->size);
 
 
+	// Pos y face
+	object1->tris[0].vertices[0] = { 1, 1, 7 };
+	object1->tris[0].vertices[1] = { -1, 1, 7 };
+	object1->tris[0].vertices[2] = { 1, 1, 5 };
+	object1->tris[0].rgb[0] = 255;
+	object1->tris[0].rgb[1] = 0;
+	object1->tris[0].rgb[2] = 0;
+
+	object1->tris[1].vertices[0] = { -1, 1, 5 };
+	object1->tris[1].vertices[1] = { -1, 1, 7 };
+	object1->tris[1].vertices[2] = { 1, 1, 5 };
+	object1->tris[1].rgb[0] = 0;
+	object1->tris[1].rgb[1] = 255;
+	object1->tris[1].rgb[2] = 0;
+
+	// Neg z face
+	object1->tris[2].vertices[0] = { 1, 1, 5 };
+	object1->tris[2].vertices[1] = { 1, -1, 5 };
+	object1->tris[2].vertices[2] = { -1, -1, 5 };
+	object1->tris[2].rgb[0] = 255;
+	object1->tris[2].rgb[1] = 0;
+	object1->tris[2].rgb[2] = 0;
+
+	object1->tris[3].vertices[0] = { 1, 1, 5 };
+	object1->tris[3].vertices[1] = { -1, 1, 5 };
+	object1->tris[3].vertices[2] = { -1, -1, 5 };
+	object1->tris[3].rgb[0] = 0;
+	object1->tris[3].rgb[1] = 0;
+	object1->tris[3].rgb[2] = 0;
+
+	// Neg y face
+	
+	object1->tris[4].vertices[0] = { 1, -1, 7 };
+	object1->tris[4].vertices[1] = { 1, -1, 5 };
+	object1->tris[4].vertices[2] = { -1, -1, 5 };
+	object1->tris[4].rgb[0] = 255;
+	object1->tris[4].rgb[1] = 0;
+	object1->tris[4].rgb[2] = 0;
+
+	object1->tris[5].vertices[0] = { 1, -1, 7 };
+	object1->tris[5].vertices[1] = { -1, -1, 7 };
+	object1->tris[5].vertices[2] = { -1, -1, 5 };
+	object1->tris[5].rgb[0] = 0;
+	object1->tris[5].rgb[1] = 0;
+	object1->tris[5].rgb[2] = 255;
+	
 
 
 	if (!init()) {
@@ -86,9 +134,17 @@ int main(int argc, char** argv)
 				SDL_RenderDrawPoint(gRenderer, SCREEN_WIDTH / 2, i);
 			}
 			*/
-			renderObject();
+			SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0x00);
+			SDL_RenderClear(gRenderer);
+
+			renderObject(object1);
+			rotateZAxis(object1, 0.01);
+			
+
+
 
 			SDL_RenderPresent(gRenderer);
+
 
 		}
 
@@ -99,10 +155,14 @@ int main(int argc, char** argv)
     return 0;
 }
 
+float edgeFunction(const Vec3f_t& a, const Vec3f_t& b, const Vec3f_t& c) {
+	return (c.x - a.x) * (b.y - a.y) - (c.y - a.y) * (b.x - a.x);
+}
+
 void renderObject(Object_t* object) {
 	Poly_t* screenSpace = (Poly_t*)malloc(sizeof(Poly_t) * object->size);
 
-	int t, b, r, l;
+	float t, b, r, l;
 
 	// Convert to Screen Space
 	for (size_t i = 0; i < object->size; i++) {
@@ -113,13 +173,12 @@ void renderObject(Object_t* object) {
 			screenSpace[i].vertices[j].y =
 				(near * object->tris[i].vertices[j].y) /
 				(-object->tris[i].vertices[j].z);
-			screenSpace[i].vertices[j].z = -object->tris[i].vertices[j].z;
 		}
 	}
 
-	t = 5;
+	t = 1 / scale;
 	b = -t;
-	r = 5;
+	r = 1 / scale;
 	l = -r;
 
 	Poly_t* NDCSpace = (Poly_t*)malloc(sizeof(Poly_t) * object->size);
@@ -139,16 +198,47 @@ void renderObject(Object_t* object) {
 	for (size_t i = 0; i < object->size; i++) {
 		for (int j = 0; j < 3; j++) {
 			rasterSpace[i].vertices[j].x =
-				(NDCSpace[i].vertices[j].x + 1) / (2 * SCREEN_WIDTH);
+				(NDCSpace[i].vertices[j].x + 1) / 2 * SCREEN_WIDTH;
 			rasterSpace[i].vertices[j].y =
-				(NDCSpace[i].vertices[j].y + 1) / (2 * SCREEN_HEIGHT);
+				(1 - NDCSpace[i].vertices[j].y) / 2 * SCREEN_HEIGHT;
+			rasterSpace[i].vertices[j].z = -object->tris[i].vertices[j].z;
+			SDL_SetRenderDrawColor(gRenderer, 0xff, 0x0, 0x0, 0xff);
 			SDL_RenderDrawPoint(gRenderer, rasterSpace[i].vertices[j].x, rasterSpace[i].vertices[j].y);
+		}
+	}
+	for (int k = 0; k < object->size; k++) {
+		float area = edgeFunction(rasterSpace[k].vertices[0], rasterSpace[k].vertices[1], rasterSpace[k].vertices[2]);
+		for (int j = 0; j < SCREEN_HEIGHT; j++) {
+			for (int i = 0; i < SCREEN_WIDTH; i++) {
+				Vec3f_t p = { i, j, 0 };
+				float w0 = edgeFunction(rasterSpace[k].vertices[1], rasterSpace[k].vertices[2], p);
+				float w1 = edgeFunction(rasterSpace[k].vertices[2], rasterSpace[k].vertices[0], p);
+				float w2 = edgeFunction(rasterSpace[k].vertices[0], rasterSpace[k].vertices[1], p);
+				if (w0 >= 0 && w1 >= 0 && w2 >= 0) {
+					//printf("Draw Point with color: %d, %d, %d\n", rasterS[k].rgb[0], rasterSpace[k].rgb[1], rasterSpace[k].rgb[2]);
+					SDL_SetRenderDrawColor(gRenderer, object->tris[k].rgb[0], object->tris[k].rgb[1], object->tris[k].rgb[2], 0xff);
+					//printf("Drawing point at (%lf, %lf)\n", rasterSpace[i].vertices[j].x, rasterSpace[i].vertices[j].y);
+					SDL_RenderDrawPoint(gRenderer, p.x, p.y);
+				}
+			}
 		}
 	}
 	
 
 
+}
 
+void rotateZAxis(Object_t* object, float theta) {
+
+	for (int i = 0; i < object->size; i++) {
+		for (int j = 0; j < 3; j++) {
+			Vec3f_t rotated;
+			rotated.x = object->tris[i].vertices[j].x * cos(theta) - object->tris[i].vertices[j].y * sin(theta);
+			rotated.y = object->tris[i].vertices[j].y * cos(theta) + object->tris[i].vertices[j].x * sin(theta);
+			object->tris[i].vertices[j].x = rotated.x;
+			object->tris[i].vertices[j].y = rotated.y;
+		}
+	}
 
 
 }
