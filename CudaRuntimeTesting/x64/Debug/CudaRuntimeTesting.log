@@ -1,47 +1,25 @@
-﻿  Compiling CUDA source file kernel.cu...
+﻿  Compiling CUDA source file ImprovedRasterizer.cu...
   
-  C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.5\bin\nvcc.exe" -gencode=arch=compute_52,code=\"sm_52,compute_52\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\bin\HostX86\x64" -x cu   -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.5\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.5\include"  -G   --keep-dir x64\Debug  -maxrregcount=0  --machine 64 --compile -cudart static  -g  -DWIN32 -DWIN64 -D_DEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /Fdx64\Debug\vc142.pdb /FS /Zi /RTC1 /MDd " -o x64\Debug\kernel.cu.obj "C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting\kernel.cu" 
-C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting\kernel.cu(60): warning #68-D: integer conversion resulted in a change of sign
+  C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.5\bin\nvcc.exe" -gencode=arch=compute_52,code=\"sm_52,compute_52\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\bin\HostX86\x64" -x cu   -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.5\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.5\include"  -G   --keep-dir x64\Debug  -maxrregcount=0  --machine 64 --compile -cudart static  -g  -DWIN32 -DWIN64 -D_DEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /Fdx64\Debug\vc142.pdb /FS /Zi /RTC1 /MDd " -o x64\Debug\ImprovedRasterizer.cu.obj "C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting\ImprovedRasterizer.cu" 
+C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting\ImprovedRasterizer.cu(335): warning #2361-D: invalid narrowing conversion from "double" to "float"
   
-C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting\kernel.cu(68): warning #68-D: integer conversion resulted in a change of sign
+C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting\ImprovedRasterizer.cu(335): warning #2361-D: invalid narrowing conversion from "double" to "float"
   
-C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting\kernel.cu(75): warning #68-D: integer conversion resulted in a change of sign
+C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting\ImprovedRasterizer.cu(335): warning #2361-D: invalid narrowing conversion from "double" to "float"
   
-C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting\kernel.cu(91): warning #68-D: integer conversion resulted in a change of sign
+C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting\ImprovedRasterizer.cu(335): warning #2361-D: invalid narrowing conversion from "double" to "float"
   
-C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting\kernel.cu(100): warning #68-D: integer conversion resulted in a change of sign
-  
-C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting\kernel.cu(213): warning #2361-D: invalid narrowing conversion from "int" to "float"
-  
-C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting\kernel.cu(213): warning #2361-D: invalid narrowing conversion from "int" to "float"
-  
-C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting\kernel.cu(60): warning #68-D: integer conversion resulted in a change of sign
-  
-C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting\kernel.cu(68): warning #68-D: integer conversion resulted in a change of sign
-  
-C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting\kernel.cu(75): warning #68-D: integer conversion resulted in a change of sign
-  
-C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting\kernel.cu(91): warning #68-D: integer conversion resulted in a change of sign
-  
-C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting\kernel.cu(100): warning #68-D: integer conversion resulted in a change of sign
-  
-C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting\kernel.cu(213): warning #2361-D: invalid narrowing conversion from "int" to "float"
-  
-C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting\kernel.cu(213): warning #2361-D: invalid narrowing conversion from "int" to "float"
-  
-  kernel.cu
-C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting\kernel.cu(60): warning C4309: '=': truncation of constant value
-C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting\kernel.cu(68): warning C4309: '=': truncation of constant value
-C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting\kernel.cu(75): warning C4309: '=': truncation of constant value
-C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting\kernel.cu(91): warning C4309: '=': truncation of constant value
-C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting\kernel.cu(100): warning C4309: '=': truncation of constant value
-C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting\kernel.cu(141): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting\kernel.cu(206): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting\kernel.cu(206): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting\kernel.cu(213): warning C4838: conversion from 'int' to 'float' requires a narrowing conversion
-C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting\kernel.cu(213): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
-C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting\kernel.cu(213): warning C4838: conversion from 'int' to 'float' requires a narrowing conversion
-C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting\kernel.cu(213): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
-C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting\kernel.cu(221): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting\kernel.cu(221): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+  ImprovedRasterizer.cu
+C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting\ImprovedRasterizer.cu(244): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting\ImprovedRasterizer.cu(245): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting\ImprovedRasterizer.cu(246): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting\ImprovedRasterizer.cu(335): warning C4838: conversion from 'double' to 'float' requires a narrowing conversion
+C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting\ImprovedRasterizer.cu(335): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting\ImprovedRasterizer.cu(335): warning C4838: conversion from 'double' to 'float' requires a narrowing conversion
+C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting\ImprovedRasterizer.cu(335): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting\ImprovedRasterizer.cu(350): warning C4244: 'argument': conversion from 'short' to 'Uint8', possible loss of data
+C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting\ImprovedRasterizer.cu(350): warning C4244: 'argument': conversion from 'short' to 'Uint8', possible loss of data
+C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting\ImprovedRasterizer.cu(350): warning C4244: 'argument': conversion from 'short' to 'Uint8', possible loss of data
+C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting\ImprovedRasterizer.cu(351): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting\ImprovedRasterizer.cu(351): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
   CudaRuntimeTesting.vcxproj -> C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\x64\Debug\CudaRuntimeTesting.exe

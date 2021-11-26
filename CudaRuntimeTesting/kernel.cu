@@ -15,14 +15,21 @@ typedef struct Vec3f {
 	float z;
 } Vec3f_t;
 
+typedef struct RBG {
+	short r;
+	short g;
+	short b;
+} RGB;
+
 typedef struct Poly {
 	Vec3f_t vertices[3];
-	char rgb[3];
+	RGB rgb;
 } Poly_t;
 
 typedef struct Object {
 	Poly_t* tris;
 	size_t size;
+	Vec3f_t pos;
 } Object_t;
 
 
@@ -31,6 +38,7 @@ SDL_Renderer* gRenderer = NULL;
 
 Vec3f_t* cameraPos;
 Vec3f_t* cameraDir;
+float zBuffer[SCREEN_HEIGHT * SCREEN_WIDTH] = {INFINITY};
 
 float near = 1;
 float scale = 1;
@@ -41,6 +49,8 @@ void close();
 
 void renderObject(Object_t* object);
 void rotateZAxis(Object_t* object, float theta);
+void rotateXAxis(Object_t* object, float theta);
+void rotateYAxis(Object_t* object, float theta);
 float edgeFunction(const Vec3f_t& a, const Vec3f_t& b, const Vec3f_t& c);
 
 
@@ -49,55 +59,79 @@ int main(int argc, char** argv)
 
 	Object_t* object1 = (Object_t*)malloc(sizeof(Object_t));
 
-	object1->size = 6;
+	object1->size = 12;
 	object1->tris = (Poly_t*)malloc(sizeof(Poly_t) * object1->size);
-
+	object1->pos = { 0, 0, 5 };
 
 	// Pos y face
-	object1->tris[0].vertices[0] = { 1, 1, 7 };
-	object1->tris[0].vertices[1] = { -1, 1, 7 };
-	object1->tris[0].vertices[2] = { 1, 1, 5 };
-	object1->tris[0].rgb[0] = 255;
-	object1->tris[0].rgb[1] = 0;
-	object1->tris[0].rgb[2] = 0;
+	object1->tris[0].vertices[0] = { 1, 1, 1 };
+	object1->tris[0].vertices[1] = { -1, 1, 1 };
+	object1->tris[0].vertices[2] = { 1, 1, -1 };
+	object1->tris[0].rgb = { 0, 0, 255 };
 
-	object1->tris[1].vertices[0] = { -1, 1, 5 };
-	object1->tris[1].vertices[1] = { -1, 1, 7 };
-	object1->tris[1].vertices[2] = { 1, 1, 5 };
-	object1->tris[1].rgb[0] = 0;
-	object1->tris[1].rgb[1] = 255;
-	object1->tris[1].rgb[2] = 0;
+	object1->tris[1].vertices[1] = { -1, 1, -1 };
+	object1->tris[1].vertices[0] = { -1, 1, 1 };
+	object1->tris[1].vertices[2] = { 1, 1, -1 };
+	object1->tris[1].rgb = { 0,255,0 };
 
 	// Neg z face
-	object1->tris[2].vertices[0] = { 1, 1, 5 };
-	object1->tris[2].vertices[1] = { 1, -1, 5 };
-	object1->tris[2].vertices[2] = { -1, -1, 5 };
-	object1->tris[2].rgb[0] = 255;
-	object1->tris[2].rgb[1] = 0;
-	object1->tris[2].rgb[2] = 0;
+	object1->tris[2].vertices[1] = { 1, 1, -1 };
+	object1->tris[2].vertices[0] = { 1, -1, -1 };
+	object1->tris[2].vertices[2] = { -1, -1, -1 };
+	object1->tris[2].rgb = { 255, 0,0 };
 
-	object1->tris[3].vertices[0] = { 1, 1, 5 };
-	object1->tris[3].vertices[1] = { -1, 1, 5 };
-	object1->tris[3].vertices[2] = { -1, -1, 5 };
-	object1->tris[3].rgb[0] = 0;
-	object1->tris[3].rgb[1] = 0;
-	object1->tris[3].rgb[2] = 0;
+	object1->tris[3].vertices[0] = { 1, 1, -1 };
+	object1->tris[3].vertices[1] = { -1, 1, -1 };
+	object1->tris[3].vertices[2] = { -1, -1, -1 };
+	object1->tris[3].rgb = { 0,0,255 };
 
 	// Neg y face
 	
-	object1->tris[4].vertices[0] = { 1, -1, 7 };
-	object1->tris[4].vertices[1] = { 1, -1, 5 };
-	object1->tris[4].vertices[2] = { -1, -1, 5 };
-	object1->tris[4].rgb[0] = 255;
-	object1->tris[4].rgb[1] = 0;
-	object1->tris[4].rgb[2] = 0;
+	object1->tris[4].vertices[0] = { 1, -1, 1 };
+	object1->tris[4].vertices[1] = { 1, -1, -1 };
+	object1->tris[4].vertices[2] = { -1, -1, -1 };
+	object1->tris[4].rgb = { 0,255,0 };
 
-	object1->tris[5].vertices[0] = { 1, -1, 7 };
-	object1->tris[5].vertices[1] = { -1, -1, 7 };
-	object1->tris[5].vertices[2] = { -1, -1, 5 };
-	object1->tris[5].rgb[0] = 0;
-	object1->tris[5].rgb[1] = 0;
-	object1->tris[5].rgb[2] = 255;
+	object1->tris[5].vertices[1] = { 1, -1, 1 };
+	object1->tris[5].vertices[0] = { -1, -1, 1 };
+	object1->tris[5].vertices[2] = { -1, -1, -1 };
+	object1->tris[5].rgb = { 255,255,255 };
+
+	// Pos Z face
+
+	object1->tris[6].vertices[1] = { 1, 1, 1 };
+	object1->tris[6].vertices[0] = { -1, 1, 1 };
+	object1->tris[6].vertices[2] = { -1, -1, 1 };
+	object1->tris[6].rgb = { 0,255,0 };
+
+	object1->tris[7].vertices[1] = { 1, 1, 1 };
+	object1->tris[7].vertices[0] = { -1, -1, 1 };
+	object1->tris[7].vertices[2] = { 1, -1, 1 };
+	object1->tris[7].rgb = { 0,0,255 };
+
+	// Pos X face
+
+	object1->tris[8].vertices[1] = { 1, -1, -1 };
+	object1->tris[8].vertices[0] = { 1, 1, -1 };
+	object1->tris[8].vertices[2] = { 1, 1, 1 };
+	object1->tris[8].rgb = { 0,255,0 };
+
+	object1->tris[9].vertices[1] = { 1, -1, -1 };
+	object1->tris[9].vertices[0] = { 1, 1, 1 };
+	object1->tris[9].vertices[2] = { 1, -1, 1 };
+	object1->tris[9].rgb = { 0,0,255 };
+
+	// Neg X face
+
+	object1->tris[10].vertices[0] = { -1, -1, -1 };
+	object1->tris[10].vertices[1] = { -1, 1, -1 };
+	object1->tris[10].vertices[2] = { -1, 1, 1 };
+	object1->tris[10].rgb = { 0,255,0 };
+
+	object1->tris[11].vertices[0] = { -1, -1, -1 };
+	object1->tris[11].vertices[1] = { -1, 1, 1 };
+	object1->tris[11].vertices[2] = { -1, -1, 1 };
+	object1->tris[11].rgb = { 0,0,255 };
 	
 
 
@@ -138,14 +172,11 @@ int main(int argc, char** argv)
 			SDL_RenderClear(gRenderer);
 
 			renderObject(object1);
-			rotateZAxis(object1, 0.01);
-			
-
-
+			//rotateXAxis(object1, 0.07);
+			//rotateZAxis(object1, 0.05);
+			rotateYAxis(object1, 0.03);
 
 			SDL_RenderPresent(gRenderer);
-
-
 		}
 
 	}
@@ -168,11 +199,11 @@ void renderObject(Object_t* object) {
 	for (size_t i = 0; i < object->size; i++) {
 		for (int j = 0; j < 3; j++) {
 			screenSpace[i].vertices[j].x =
-				(near * object->tris[i].vertices[j].x) /
-				(-object->tris[i].vertices[j].z);
+				(near * (object->tris[i].vertices[j].x + object->pos.x)) /
+				(-object->tris[i].vertices[j].z - object->pos.z);
 			screenSpace[i].vertices[j].y =
-				(near * object->tris[i].vertices[j].y) /
-				(-object->tris[i].vertices[j].z);
+				(near * (object->tris[i].vertices[j].y + object->pos.y)) /
+				(-object->tris[i].vertices[j].z - object->pos.z);
 		}
 	}
 
@@ -201,23 +232,35 @@ void renderObject(Object_t* object) {
 				(NDCSpace[i].vertices[j].x + 1) / 2 * SCREEN_WIDTH;
 			rasterSpace[i].vertices[j].y =
 				(1 - NDCSpace[i].vertices[j].y) / 2 * SCREEN_HEIGHT;
-			rasterSpace[i].vertices[j].z = -object->tris[i].vertices[j].z;
-			SDL_SetRenderDrawColor(gRenderer, 0xff, 0x0, 0x0, 0xff);
-			SDL_RenderDrawPoint(gRenderer, rasterSpace[i].vertices[j].x, rasterSpace[i].vertices[j].y);
+			rasterSpace[i].vertices[j].z = -object->tris[i].vertices[j].z - object->pos.z;
 		}
 	}
+
+	// Loop over all triangles in the object
 	for (int k = 0; k < object->size; k++) {
 		float area = edgeFunction(rasterSpace[k].vertices[0], rasterSpace[k].vertices[1], rasterSpace[k].vertices[2]);
-		for (int j = 0; j < SCREEN_HEIGHT; j++) {
-			for (int i = 0; i < SCREEN_WIDTH; i++) {
+		// Calculate Bounding Box for triangle
+		Vec3f_t bbmin, bbmax;
+		bbmin.x = INFINITY;
+		bbmin.y = INFINITY;
+		bbmax.x = -INFINITY;
+		bbmax.y = -INFINITY;
+		for (int p = 0; p < 3; p++) {
+			Vec3f_t vertex = rasterSpace[k].vertices[p];
+			if (vertex.x < bbmin.x) bbmin.x = vertex.x;
+			if (vertex.y < bbmin.y) bbmin.y = vertex.y;
+			if (vertex.x > bbmax.x) bbmax.x = vertex.x;
+			if (vertex.y > bbmax.y) bbmax.y = vertex.y;
+		}
+		// Check if each pixel in bounding box is on triangle
+		for (int j = (int)bbmin.y; j < (int)bbmax.y; j++) {
+			for (int i = (int)bbmin.x; i < (int)bbmax.x; i++) {
 				Vec3f_t p = { i, j, 0 };
 				float w0 = edgeFunction(rasterSpace[k].vertices[1], rasterSpace[k].vertices[2], p);
 				float w1 = edgeFunction(rasterSpace[k].vertices[2], rasterSpace[k].vertices[0], p);
 				float w2 = edgeFunction(rasterSpace[k].vertices[0], rasterSpace[k].vertices[1], p);
 				if (w0 >= 0 && w1 >= 0 && w2 >= 0) {
-					//printf("Draw Point with color: %d, %d, %d\n", rasterS[k].rgb[0], rasterSpace[k].rgb[1], rasterSpace[k].rgb[2]);
-					SDL_SetRenderDrawColor(gRenderer, object->tris[k].rgb[0], object->tris[k].rgb[1], object->tris[k].rgb[2], 0xff);
-					//printf("Drawing point at (%lf, %lf)\n", rasterSpace[i].vertices[j].x, rasterSpace[i].vertices[j].y);
+					SDL_SetRenderDrawColor(gRenderer, object->tris[k].rgb.r, object->tris[k].rgb.g, object->tris[k].rgb.b, 0xff);
 					SDL_RenderDrawPoint(gRenderer, p.x, p.y);
 				}
 			}
@@ -229,7 +272,6 @@ void renderObject(Object_t* object) {
 }
 
 void rotateZAxis(Object_t* object, float theta) {
-
 	for (int i = 0; i < object->size; i++) {
 		for (int j = 0; j < 3; j++) {
 			Vec3f_t rotated;
@@ -239,9 +281,32 @@ void rotateZAxis(Object_t* object, float theta) {
 			object->tris[i].vertices[j].y = rotated.y;
 		}
 	}
-
-
 }
+
+void rotateXAxis(Object_t* object, float theta) {
+	for (int i = 0; i < object->size; i++) {
+		for (int j = 0; j < 3; j++) {
+			Vec3f_t rotated;
+			rotated.y = object->tris[i].vertices[j].y * cos(theta) - object->tris[i].vertices[j].z * sin(theta);
+			rotated.z = object->tris[i].vertices[j].z * cos(theta) + object->tris[i].vertices[j].y * sin(theta);
+			object->tris[i].vertices[j].y = rotated.y;
+			object->tris[i].vertices[j].z = rotated.z;
+		}
+	}
+}
+
+void rotateYAxis(Object_t* object, float theta) {
+	for (int i = 0; i < object->size; i++) {
+		for (int j = 0; j < 3; j++) {
+			Vec3f_t rotated;
+			rotated.x = object->tris[i].vertices[j].x * cos(theta) - object->tris[i].vertices[j].z * sin(theta);
+			rotated.z = object->tris[i].vertices[j].z * cos(theta) + object->tris[i].vertices[j].x * sin(theta);
+			object->tris[i].vertices[j].x = rotated.x;
+			object->tris[i].vertices[j].z = rotated.z;
+		}
+	}
+}
+
 
 
 bool init() {
