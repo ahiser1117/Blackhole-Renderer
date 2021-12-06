@@ -1,2 +1,0 @@
-C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting - Copy\x64\Debug\BlackHoleRenderer.exe
-C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting - Copy\x64\Debug\BlackHoleRenderer.pdb
