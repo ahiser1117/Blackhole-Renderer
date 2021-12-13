@@ -10,22 +10,19 @@ C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTe
   
 C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting - Copy\stb_image.h(6999): warning #550-D: variable "delays_size" was set but never used
   
-C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting - Copy\ImprovedRasterizer.cu(27): warning #375-D: declaration requires a typedef name
+C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting - Copy\ImprovedRasterizer.cu(26): warning #375-D: declaration requires a typedef name
   
-C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting - Copy\ImprovedRasterizer.cu(15): warning #177-D: variable "stepSize" was declared but never referenced
-  
-C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting - Copy\ImprovedRasterizer.cu(27): warning #375-D: declaration requires a typedef name
+C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting - Copy\ImprovedRasterizer.cu(26): warning #375-D: declaration requires a typedef name
   
   ImprovedRasterizer.cu
-C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting - Copy\ImprovedRasterizer.cu(161): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting - Copy\ImprovedRasterizer.cu(162): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting - Copy\ImprovedRasterizer.cu(166): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting - Copy\ImprovedRasterizer.cu(167): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting - Copy\ImprovedRasterizer.cu(171): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting - Copy\ImprovedRasterizer.cu(172): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting - Copy\ImprovedRasterizer.cu(176): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting - Copy\ImprovedRasterizer.cu(177): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting - Copy\ImprovedRasterizer.cu(209): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
-C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting - Copy\ImprovedRasterizer.cu(250): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting - Copy\ImprovedRasterizer.cu(251): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting - Copy\ImprovedRasterizer.cu(53): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting - Copy\ImprovedRasterizer.cu(163): warning C4305: '+=': truncation from 'double' to 'float'
+C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting - Copy\ImprovedRasterizer.cu(168): warning C4305: '-=': truncation from 'double' to 'float'
+C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting - Copy\ImprovedRasterizer.cu(172): warning C4305: '-=': truncation from 'double' to 'float'
+C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting - Copy\ImprovedRasterizer.cu(176): warning C4305: '+=': truncation from 'double' to 'float'
+C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting - Copy\ImprovedRasterizer.cu(210): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
+C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting - Copy\ImprovedRasterizer.cu(260): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting - Copy\ImprovedRasterizer.cu(261): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting - Copy\ImprovedRasterizer.cu(262): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\CudaRuntimeTesting - Copy\ImprovedRasterizer.cu(264): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
   CudaRuntimeTesting.vcxproj -> C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\x64\Debug\BlackHoleRenderer.exe

@@ -9,10 +9,9 @@
 #include "stb_image.h"
 
 
-const int SCREEN_WIDTH = 400;
-const int SCREEN_HEIGHT = 400;
+const int SCREEN_WIDTH = 1000;
+const int SCREEN_HEIGHT = 800;
 const int BLOCKSIZE = 8;
-const float stepSize = 1;
 
 typedef struct Vec3f {
 	float x;
@@ -36,13 +35,13 @@ typedef unsigned char Rgb[3];
 SDL_Window* gWindow = NULL;
 SDL_Renderer* gRenderer = NULL;
 
-Vec3f_t cameraPos = { 0, 0, 0 };
+Vec3f_t cameraPos = { 0, 0, 0.5 };
 Vec3f_t cameraDir = { 0, -1, 0 };
 Vec3f_t cameraUp = { 0, 0, 1 };
 Vec3f_t cameraRight = { -1, 0, 0 };
 Vec3f_t globalUp = { 0, 0, 1 };
 
-Vec3f_t blackHolePos = { 0, -60, 0 };
+Vec3f_t blackHolePos = { 0, -11, 0 };
 
 Ray rays[SCREEN_HEIGHT * SCREEN_WIDTH];
 Rgb* frameBuffer = new Rgb[SCREEN_WIDTH * SCREEN_HEIGHT];
@@ -50,6 +49,8 @@ uint8_t* rgb_image;
 
 float starFieldRadius = 80;
 float fov = 70;
+float pitch = -0.5;
+float yaw = -0.15;
 
 int width, height, bpp;
 
@@ -72,7 +73,7 @@ int main(int argc, char** argv){
 	Dims* dims;
 	Vec3f_t* gpu_blackHole;
 
-	rgb_image = stbi_load("Equirectangular_projection_SW.png", &width, &height, &bpp, 3);
+	rgb_image = stbi_load("starmap_2020_4k_brighter.png", &width, &height, &bpp, 3);
 
 	// Allocate space for the frameBuffer on the GPU
 	if (cudaMalloc(&gpu_frameBuffer, sizeof(Rgb)*SCREEN_HEIGHT*SCREEN_WIDTH) != cudaSuccess) {
@@ -158,23 +159,21 @@ int main(int argc, char** argv){
 					switch (e.key.keysym.sym)
 					{
 					case SDLK_UP:
-						rodriguesFormula(&cameraDir, cameraDir, cameraRight, 0.1);
-						rodriguesFormula(&cameraUp, cameraUp, cameraRight, 0.1);
+						if(pitch + 0.1 <= 3.14/2)
+							pitch += 0.1;
 						break;
 
 					case SDLK_DOWN:
-						rodriguesFormula(&cameraDir, cameraDir, cameraRight, -0.1);
-						rodriguesFormula(&cameraUp, cameraUp, cameraRight, -0.1);
+						if(pitch - 0.1 >= -3.14/2)
+							pitch -= 0.1;
 						break;
 
 					case SDLK_LEFT:
-						rodriguesFormula(&cameraDir, cameraDir, globalUp, -0.1);
-						rodriguesFormula(&cameraRight, cameraRight, globalUp, -0.1);
+						yaw -= 0.1;
 						break;
 
 					case SDLK_RIGHT:
-						rodriguesFormula(&cameraDir, cameraDir, globalUp, 0.1);
-						rodriguesFormula(&cameraRight, cameraRight, globalUp, 0.1);
+						yaw += 0.1;
 						break;
 					case SDLK_ESCAPE:
 						close();
@@ -184,6 +183,8 @@ int main(int argc, char** argv){
 					printf("Camera Dir: (%lf, %lf, %lf)\n", cameraDir.x, cameraDir.y, cameraDir.z);
 					printf("Camera Up: (%lf, %lf, %lf)\n", cameraUp.x, cameraUp.y, cameraUp.z);
 					printf("Camera Right: (%lf, %lf, %lf)\n", cameraRight.x, cameraRight.y, cameraRight.z);
+					printf("Yaw: %lf\n", yaw);
+					printf("Pitch: %lf\n", pitch);
 
 					init_rays();
 
@@ -244,14 +245,33 @@ int main(int argc, char** argv){
 
 void init_rays() {
 	printf("Initializing Rays\n");
+	cameraDir = { 0, -1, 0 };
+	cameraUp = { 0, 0, 1 };
+	cameraRight = { -1, 0, 0 };
+	rodriguesFormula(&cameraDir, cameraDir, cameraRight, pitch);
+	rodriguesFormula(&cameraUp, cameraUp, cameraRight, pitch);
+	rodriguesFormula(&cameraDir, cameraDir, globalUp, yaw);
+	rodriguesFormula(&cameraRight, cameraRight, globalUp, yaw);
 	for (int i = 0; i < SCREEN_WIDTH; i++) {
 		for (int j = 0; j < SCREEN_HEIGHT; j++) {
 			rays[j * SCREEN_WIDTH + i].pos = cameraPos;
-			float theta = (fov * ((float)i / SCREEN_WIDTH) - fov / 2) * (2 * M_PI / 360);
-			float phi = (fov * (-(float)j / SCREEN_HEIGHT) + fov / 2) * (2 * M_PI / 360);
-			rays[j * SCREEN_WIDTH + i].dir = cameraDir;
-			rodriguesFormula(&rays[j * SCREEN_WIDTH + i].dir, rays[j * SCREEN_WIDTH + i].dir, cameraUp, theta);
-			rodriguesFormula(&rays[j * SCREEN_WIDTH + i].dir, rays[j * SCREEN_WIDTH + i].dir, cameraRight, phi);
+			Vec3f_t toPos;
+			float aspectRatio = (float)SCREEN_WIDTH / SCREEN_HEIGHT;
+			toPos.x = cameraPos.x + cameraDir.x * 0.8 + (-((float)i / SCREEN_WIDTH) + 0.5) * cameraRight.x * aspectRatio + (-((float)j / SCREEN_HEIGHT) + 0.5) * cameraUp.x;
+			toPos.y = cameraPos.y + cameraDir.y * 0.8 + (-((float)i / SCREEN_WIDTH) + 0.5) * cameraRight.y * aspectRatio + (-((float)j / SCREEN_HEIGHT) + 0.5) * cameraUp.y;
+			toPos.z = cameraPos.z + cameraDir.z * 0.8 + (-((float)i / SCREEN_WIDTH) + 0.5) * cameraRight.z * aspectRatio + (-((float)j / SCREEN_HEIGHT) + 0.5) * cameraUp.z;
+
+			float mag = sqrt(pow(toPos.x, 2) + pow(toPos.y, 2) + pow(toPos.z, 2));
+
+			toPos.x = toPos.x / mag;
+			toPos.y = toPos.y / mag;
+			toPos.z = toPos.z / mag;
+			//printf("Ray at: (%.2lf, %.2lf)\n", (fov * ((float)i / SCREEN_WIDTH) - fov / 2), (fov * (-(float)j / SCREEN_HEIGHT) + fov / 2));
+			//float theta = (fov * ((float)i / SCREEN_WIDTH) - fov / 2) * (2 * M_PI / 360);
+			//float phi = (fov * (-(float)j / SCREEN_HEIGHT) + fov / 2) * (2 * M_PI / 360);
+			rays[j * SCREEN_WIDTH + i].dir = toPos;
+			//rodriguesFormula(&rays[j * SCREEN_WIDTH + i].dir, rays[j * SCREEN_WIDTH + i].dir, cameraUp, theta);
+			//rodriguesFormula(&rays[j * SCREEN_WIDTH + i].dir, rays[j * SCREEN_WIDTH + i].dir, cameraRight, phi);
 			rays[j * SCREEN_WIDTH + i].colored = false;
 			//printf("Initializing Ray at Theta: %lf, Phi: %lf\n", theta, phi);
 		}
@@ -260,64 +280,112 @@ void init_rays() {
 }
 
 __global__ void propRays(Rgb* gpu_frameBuffer, uint8_t* gpu_rgb_image, Ray* gpu_rays, Dims* dims, Vec3f_t* gpu_blackHole) {
+	float stepSize = 0.01;
+	float bhRadius = 3;
+	int rings = 10;
 	int i = threadIdx.x + blockIdx.x * BLOCKSIZE;
 	int j = threadIdx.y + blockIdx.y * BLOCKSIZE;
 	//printf("Thread: (%d, %d), Block: (%d, %d)\n", threadIdx.x, threadIdx.y, blockIdx.x, blockIdx.y);
 	if (i > SCREEN_WIDTH || j > SCREEN_HEIGHT) return;
 	if (!gpu_rays[j * SCREEN_WIDTH + i].colored){
-		gpu_rays[j * SCREEN_WIDTH + i].pos.x += gpu_rays[j * SCREEN_WIDTH + i].dir.x;
-		gpu_rays[j * SCREEN_WIDTH + i].pos.y += gpu_rays[j * SCREEN_WIDTH + i].dir.y;
-		gpu_rays[j * SCREEN_WIDTH + i].pos.z += gpu_rays[j * SCREEN_WIDTH + i].dir.z;
-		//printf("Moving Ray\n");
-		if (gpu_rays[j * SCREEN_WIDTH + i].pos.x * gpu_rays[j * SCREEN_WIDTH + i].pos.x +
-			gpu_rays[j * SCREEN_WIDTH + i].pos.y * gpu_rays[j * SCREEN_WIDTH + i].pos.y +
-			gpu_rays[j * SCREEN_WIDTH + i].pos.z * gpu_rays[j * SCREEN_WIDTH + i].pos.z >= 1) {
-			float rho = pow(gpu_rays[j * SCREEN_WIDTH + i].dir.x, 2) + pow(gpu_rays[j * SCREEN_WIDTH + i].dir.y, 2) + pow(gpu_rays[j * SCREEN_WIDTH + i].dir.z, 2);
-			float ax = -gpu_rays[j * SCREEN_WIDTH + i].dir.x * gpu_rays[j * SCREEN_WIDTH + i].pos.x + gpu_rays[j * SCREEN_WIDTH + i].dir.x * gpu_blackHole->x;
-			float ay = -gpu_rays[j * SCREEN_WIDTH + i].dir.y * gpu_rays[j * SCREEN_WIDTH + i].pos.y + gpu_rays[j * SCREEN_WIDTH + i].dir.y * gpu_blackHole->y;
-			float az = -gpu_rays[j * SCREEN_WIDTH + i].dir.z * gpu_rays[j * SCREEN_WIDTH + i].pos.z + gpu_rays[j * SCREEN_WIDTH + i].dir.z * gpu_blackHole->z;
-			float a = (ax + ay + az) / rho;
-			Vec3f_t perihelion;
-			perihelion.x = gpu_rays[j * SCREEN_WIDTH + i].pos.x + a * gpu_rays[j * SCREEN_WIDTH + i].dir.x;
-			perihelion.y = gpu_rays[j * SCREEN_WIDTH + i].pos.y + a * gpu_rays[j * SCREEN_WIDTH + i].dir.y;
-			perihelion.z = gpu_rays[j * SCREEN_WIDTH + i].pos.z + a * gpu_rays[j * SCREEN_WIDTH + i].dir.z;
-			
-			float b = sqrt(pow(gpu_blackHole->x - perihelion.x, 2) + pow(gpu_blackHole->y - perihelion.y, 2) + pow(gpu_blackHole->z - perihelion.z, 2));
-			
-			/*
-			if (b < 2) {
-				gpu_frameBuffer[j * SCREEN_WIDTH + i][0] = 0;
-				gpu_frameBuffer[j * SCREEN_WIDTH + i][1] = 0;
-				gpu_frameBuffer[j * SCREEN_WIDTH + i][2] = 0;
+
+		Vec3f_t toBHOld;
+		toBHOld.x = gpu_blackHole->x - gpu_rays[j * SCREEN_WIDTH + i].pos.x;
+		toBHOld.y = gpu_blackHole->y - gpu_rays[j * SCREEN_WIDTH + i].pos.y;
+		toBHOld.z = gpu_blackHole->z - gpu_rays[j * SCREEN_WIDTH + i].pos.z;
+
+		float rOld = sqrt(pow(toBHOld.x, 2) + pow(toBHOld.y, 2) + pow(toBHOld.z, 2));
+
+		float rho = pow(gpu_rays[j * SCREEN_WIDTH + i].dir.x, 2) + pow(gpu_rays[j * SCREEN_WIDTH + i].dir.y, 2) + pow(gpu_rays[j * SCREEN_WIDTH + i].dir.z, 2);
+
+		float ax = -gpu_rays[j * SCREEN_WIDTH + i].dir.x * gpu_rays[j * SCREEN_WIDTH + i].pos.x + gpu_rays[j * SCREEN_WIDTH + i].dir.x * gpu_blackHole->x;
+		float ay = -gpu_rays[j * SCREEN_WIDTH + i].dir.y * gpu_rays[j * SCREEN_WIDTH + i].pos.y + gpu_rays[j * SCREEN_WIDTH + i].dir.y * gpu_blackHole->y;
+		float az = -gpu_rays[j * SCREEN_WIDTH + i].dir.z * gpu_rays[j * SCREEN_WIDTH + i].pos.z + gpu_rays[j * SCREEN_WIDTH + i].dir.z * gpu_blackHole->z;
+		float a = (ax + ay + az) / rho;
+
+		Vec3f_t perihelion;
+		perihelion.x = gpu_rays[j * SCREEN_WIDTH + i].pos.x + a * gpu_rays[j * SCREEN_WIDTH + i].dir.x;
+		perihelion.y = gpu_rays[j * SCREEN_WIDTH + i].pos.y + a * gpu_rays[j * SCREEN_WIDTH + i].dir.y;
+		perihelion.z = gpu_rays[j * SCREEN_WIDTH + i].pos.z + a * gpu_rays[j * SCREEN_WIDTH + i].dir.z;
+
+		float b = sqrt(pow(gpu_blackHole->x - perihelion.x, 2) + pow(gpu_blackHole->y - perihelion.y, 2) + pow(gpu_blackHole->z - perihelion.z, 2));
+
+		Vec3f_t radiusVec;
+		radiusVec.x = gpu_blackHole->x - perihelion.x;
+		radiusVec.y = gpu_blackHole->y - perihelion.y;
+		radiusVec.z = gpu_blackHole->z - perihelion.z;
+
+		Vec3f_t normal;
+		normal.x = gpu_rays[j * SCREEN_WIDTH + i].dir.y * radiusVec.z - gpu_rays[j * SCREEN_WIDTH + i].dir.z * radiusVec.y;
+		normal.y = gpu_rays[j * SCREEN_WIDTH + i].dir.z * radiusVec.x - gpu_rays[j * SCREEN_WIDTH + i].dir.x * radiusVec.z;
+		normal.z = gpu_rays[j * SCREEN_WIDTH + i].dir.x * radiusVec.y - gpu_rays[j * SCREEN_WIDTH + i].dir.y * radiusVec.x;
+
+		gpu_rays[j * SCREEN_WIDTH + i].pos.x += gpu_rays[j * SCREEN_WIDTH + i].dir.x * stepSize;
+		gpu_rays[j * SCREEN_WIDTH + i].pos.y += gpu_rays[j * SCREEN_WIDTH + i].dir.y * stepSize;
+		gpu_rays[j * SCREEN_WIDTH + i].pos.z += gpu_rays[j * SCREEN_WIDTH + i].dir.z * stepSize;
+
+		Vec3f_t toBH;
+		toBH.x = gpu_blackHole->x - gpu_rays[j * SCREEN_WIDTH + i].pos.x;
+		toBH.y = gpu_blackHole->y - gpu_rays[j * SCREEN_WIDTH + i].pos.y;
+		toBH.z = gpu_blackHole->z - gpu_rays[j * SCREEN_WIDTH + i].pos.z;
+
+		float r = sqrt(pow(toBH.x, 2) + pow(toBH.y, 2) + pow(toBH.z, 2));
+
+		float dr = r - rOld;
+
+		float theta = dr / (pow(r, 2) * sqrt((1 / pow(b, 2)) - (1 - bhRadius / r) * (1 / pow(r, 2))));
+
+		Vec3f_t rotVec;
+		Vec3f_t v = gpu_rays[j * SCREEN_WIDTH + i].dir;
+		Vec3f_t k = normal;
+		float kvDot = gpu_rays[j * SCREEN_WIDTH + i].dir.x * normal.x +
+			gpu_rays[j * SCREEN_WIDTH + i].dir.y * normal.y +
+			gpu_rays[j * SCREEN_WIDTH + i].dir.z * normal.z;
+
+		rotVec.x = v.x * cos(theta) + (k.y * v.z - k.z * v.y) * sin(theta) + k.x * (kvDot) * (1 - cos(theta));
+		rotVec.y = v.y * cos(theta) + (k.z * v.x - k.x * v.z) * sin(theta) + k.y * (kvDot) * (1 - cos(theta));
+		rotVec.z = v.z * cos(theta) + (k.x * v.y - k.y * v.x) * sin(theta) + k.z * (kvDot) * (1 - cos(theta));
+
+		gpu_rays[j * SCREEN_WIDTH + i].dir = rotVec;
+		//printf("Dist to BH: %lf\n", distToBH);
+
+		
+		if (r <= bhRadius) {
+			gpu_frameBuffer[j * SCREEN_WIDTH + i][0] = 0;
+			gpu_frameBuffer[j * SCREEN_WIDTH + i][1] = 0;
+			gpu_frameBuffer[j * SCREEN_WIDTH + i][2] = 0;
+			gpu_rays[j * SCREEN_WIDTH + i].colored = true;
+			//printf("Blackhole hit\n");
+			return;
+		}
+		else if (r < bhRadius + 3) {
+			float angle = acos(gpu_rays[j * SCREEN_WIDTH + i].pos.z / r);
+			if (angle < M_PI / 2 + 0.005 && angle > M_PI / 2 - 0.005) {
+				gpu_frameBuffer[j * SCREEN_WIDTH + i][0] = r * 255 * rings;
+				gpu_frameBuffer[j * SCREEN_WIDTH + i][1] = r * 255 * rings;
+				gpu_frameBuffer[j * SCREEN_WIDTH + i][2] = r * 255 * rings;
+				gpu_rays[j * SCREEN_WIDTH + i].colored = true;
 				return;
+				//printf("Acretion Disk hit\n");
 			}
+
+		}
+		
+
+		//printf("Moving Ray\n");
+		if (!gpu_rays[j * SCREEN_WIDTH + i].colored && r >= 30) {
+
+			/*
+			gpu_frameBuffer[j * SCREEN_WIDTH + i][0] = 40;
+			gpu_frameBuffer[j * SCREEN_WIDTH + i][1] = 40;
+			gpu_frameBuffer[j * SCREEN_WIDTH + i][2] = 40;
+			gpu_rays[j * SCREEN_WIDTH + i].colored = true;
+			return;
 			*/
+
+			//printf("Dist to BH: %lf\n", distToBH);
 			
-			Vec3f_t radiusVec;
-			radiusVec.x = gpu_blackHole->x - perihelion.x;
-			radiusVec.y = gpu_blackHole->y - perihelion.y;
-			radiusVec.z = gpu_blackHole->z - perihelion.z;
-			Vec3f_t normal;
-			normal.x = gpu_rays[j * SCREEN_WIDTH + i].dir.y * radiusVec.z - gpu_rays[j * SCREEN_WIDTH + i].dir.z * radiusVec.y;
-			normal.y = gpu_rays[j * SCREEN_WIDTH + i].dir.z * radiusVec.x - gpu_rays[j * SCREEN_WIDTH + i].dir.x * radiusVec.z;
-			normal.z = gpu_rays[j * SCREEN_WIDTH + i].dir.x * radiusVec.y - gpu_rays[j * SCREEN_WIDTH + i].dir.y * radiusVec.x;
-
-			float theta = 0 / b;
-			//printf("Rotating around BH by: %lf\n", theta);
-			Vec3f_t rotVec;
-			Vec3f_t v = gpu_rays[j * SCREEN_WIDTH + i].dir;
-			Vec3f_t k = normal;
-			float kvDot = gpu_rays[j * SCREEN_WIDTH + i].dir.x * normal.x +
-				gpu_rays[j * SCREEN_WIDTH + i].dir.y * normal.y +
-				gpu_rays[j * SCREEN_WIDTH + i].dir.z * normal.z;
-
-			rotVec.x = v.x * cos(theta) + (k.y * v.z - k.z * v.y) * sin(theta) + k.x * (kvDot) * (1 - cos(theta));
-			rotVec.y = v.y * cos(theta) + (k.z * v.x - k.x * v.z) * sin(theta) + k.y * (kvDot) * (1 - cos(theta));
-			rotVec.z = v.z * cos(theta) + (k.x * v.y - k.y * v.x) * sin(theta) + k.z * (kvDot) * (1 - cos(theta));
-			
-
-			gpu_rays[j * SCREEN_WIDTH + i].dir = rotVec;
-			rho = pow(gpu_rays[j * SCREEN_WIDTH + i].dir.x, 2) + pow(gpu_rays[j * SCREEN_WIDTH + i].dir.y, 2) + pow(gpu_rays[j * SCREEN_WIDTH + i].dir.z, 2);
+			float rho = pow(gpu_rays[j * SCREEN_WIDTH + i].dir.x, 2) + pow(gpu_rays[j * SCREEN_WIDTH + i].dir.y, 2) + pow(gpu_rays[j * SCREEN_WIDTH + i].dir.z, 2);
 			gpu_rays[j * SCREEN_WIDTH + i].dir.x = gpu_rays[j * SCREEN_WIDTH + i].dir.x / sqrt(rho);
 			gpu_rays[j * SCREEN_WIDTH + i].dir.y = gpu_rays[j * SCREEN_WIDTH + i].dir.y / sqrt(rho);
 			gpu_rays[j * SCREEN_WIDTH + i].dir.z = gpu_rays[j * SCREEN_WIDTH + i].dir.z / sqrt(rho);
@@ -330,8 +398,8 @@ __global__ void propRays(Rgb* gpu_frameBuffer, uint8_t* gpu_rgb_image, Ray* gpu_
 			else
 				lambda = M_PI / 2;
 			float phi = acos(gpu_rays[j * SCREEN_WIDTH + i].dir.z);
-			int x = (lambda / (2 * M_PI)) * dims->width;
-			int y = (phi / M_PI) * dims->height;
+			int x = ((lambda) / (2 * M_PI)) * dims->width;
+			int y = ((phi) / M_PI) * dims->height;
 			//printf("Drawing (%d, %d)\n", x, y);
 			gpu_rays[j * SCREEN_WIDTH + i].colored = true;
 			if (y * dims->width * 3 + x * 3 < dims->width * dims->height * 3) {
@@ -339,9 +407,8 @@ __global__ void propRays(Rgb* gpu_frameBuffer, uint8_t* gpu_rgb_image, Ray* gpu_
 				gpu_frameBuffer[j * SCREEN_WIDTH + i][1] = gpu_rgb_image[y * dims->width * 3 + x * 3 + 1];
 				gpu_frameBuffer[j * SCREEN_WIDTH + i][2] = gpu_rgb_image[y * dims->width * 3 + x * 3 + 2];
 			}
+			
 		}
-		
-
 	}
 }
 
@@ -352,7 +419,7 @@ void rodriguesFormula(Vec3f_t* rotVec, Vec3f_t v, Vec3f_t k, float theta) {
 	Vec3f_t newVec;
 
 	newVec.x = v.x * cos(theta) + (k.y * v.z - k.z * v.y) * sin(theta) + k.x * (kvDot) * (1 - cos(theta));
-	newVec.y = v.y * cos(theta) + (k.z * v.x- k.x * v.z) * sin(theta) + k.y * (kvDot) * (1 - cos(theta));
+	newVec.y = v.y * cos(theta) + (k.z * v.x - k.x * v.z) * sin(theta) + k.y * (kvDot) * (1 - cos(theta));
 	newVec.z = v.z * cos(theta) + (k.x * v.y - k.y * v.x) * sin(theta) + k.z * (kvDot) * (1 - cos(theta));
 	*rotVec = newVec;
 }
