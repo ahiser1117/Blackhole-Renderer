@@ -13,7 +13,7 @@ Paper: https://iopscience.iop.org/article/10.1088/0264-9381/32/6/065001#cqg50875
 
 Their method was surprisingly simple. They followed a basic ray tracing algorithm. This algorithm starts with a point in space representing the camera. Then they cast rays out from the camera into the scene until a light source is reached. Each ray will define the color of a single pixel.
 
-![CameraToImagePlane](D:\alexh\Pictures\CameraToImagePlane.jpg)
+![CameraToImagePlane](https://github.com/greenisfun100/CSC213-FinalProject/blob/main/ReadmeImages/CameraToImagePlane.jpg)
 
 The difference from a normal ray tracer is that the rays will not follow straight lines. Because of the bending of spacetime that occurs near a massive object, the light rays will curve around it. This effect is called Gravitational lensing.
 
@@ -21,7 +21,7 @@ The difference from a normal ray tracer is that the rays will not follow straigh
 
 As the rays move through space they either hit the blackhole's event horizon, hit a light source, or end up being sent out into space. The first two situations are easy. The last takes a little more effort. My method was to first define a threshold where we decide a ray is no longer being effected by the blackhole significantly and we can approximate its path to being straight. I then extend the ray out to infinity and calculate its position on a 360 image of stars. 
 
-![star-map](C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\BlackholeRenderer\star-map.png)
+![star-map](https://github.com/greenisfun100/CSC213-FinalProject/blob/main/ReadmeImages/star-map.png)
 
 This is the main 360 image I used. It uses a projection technique called Equirectangular projection where latitude and longitude lines create squares that are equal throughout the image. This makes projecting from spherical coordinates to image coordinates straight forward. 
 
@@ -102,16 +102,8 @@ void init_rays(Args_t* args) {
 ```
 
 I then have it render the black hole. The paths of the rays are calculated using a numerical calculation technique called Runge-Kutta 4. This uses 4 sub steps based on the first derivative of the function you are trying to solve. 
-$$
-\frac{d y}{d t} = f(t, y), \quad y(t_0) = y_0 \\
 
-y_{n+1} = y_n + \frac{1}{6}h(k_1 + 2k_2 + 2k_3 + k_4) \\ \\
-
-k_1 = f(t_n, y_n), \\
-k_2 = f\left(t_n + \frac{h}{2}, y_n + h \frac{k_1}{2}\right), \\
-k_3 = f\left(t_n + \frac{h}{2}, y_n + h \frac{k_2}{2}\right), \\
-k_4 = f\left(t_n + h, y_n + h k_3\right).
-$$
+![Runge-Kutta4](https://github.com/greenisfun100/CSC213-FinalProject/blob/main/ReadmeImages/Rk4Equations.jpg)
 
 ```c
 // Runge-Kutta 4 Numerical calulation substeps
@@ -142,13 +134,12 @@ $$
 What is $f(t, y)$?
 
 The rays are deflected by an angle so we need to find the angle.
-$$
-\varphi = \int \frac{dr}{r^2 \sqrt{\frac{1}{b^2} - \left( 1 - \frac{r_s}{r}\right)\frac{1}{r^2}}}
-$$
+
+![PhiEquation](https://github.com/greenisfun100/CSC213-FinalProject/blob/main/ReadmeImages/phiIntegral.jpg)
+
 Where $r$ is the distance from the center of the black hole, $r_s$ is the radius of the event horizon of the blackhole, and $b$ is the point of closest approach if the current ray is projected to infinity. But we want to get the infinitesimal change from this so $d\varphi$ looks like:
-$$
-d\varphi = \frac{dr}{r^2 \sqrt{\frac{1}{b^2} - \left( 1 - \frac{r_s}{r}\right)\frac{1}{r^2}}}
-$$
+
+![DPhiEquation](https://github.com/greenisfun100/CSC213-FinalProject/blob/main/ReadmeImages/dPhiEquation.jpg)
 
 ```c
 // First derivative of the position
@@ -192,9 +183,9 @@ __device__ Result_t f(Vec3f_t pos, Vec3f_t dir, Vec3f_t bhPos, float stepSize, f
 I use the Rodrigues rotation formula to calculate the resulting vector after rotation.
 
 Rodrigues Formula:
-$$
-\mathbf{v}_{rot} = \mathbf{v} \cos\theta + (\mathbf{k} \cross \mathbf{v}) \sin\theta + \mathbf{k} (\mathbf{k} \cdot \mathbf{v})(1 - \cos\theta)
-$$
+
+![img](https://github.com/greenisfun100/CSC213-FinalProject/blob/main/ReadmeImages/RodriguesFormula.jpg)
+
 ![img](https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Rodrigues-formula.svg/1024px-Rodrigues-formula.svg.png)
 
 This process is iterated over until the rays either hit the blackhole, accretion disk, or the celestial sphere. 
@@ -203,34 +194,33 @@ This process is iterated over until the rays either hit the blackhole, accretion
 
 Then we have finally rendered an image. My first few images were not amazing. The projections were off. Notice the curve of the accretion disk here. This image is looking straight at the side of the blackhole so the disk should make a straight line, it does not. What is working is the ability to see the accretion disk above and below the blackhole. This is the expected behavior and shows us that the gravitational lensing is working.
 
-![Screenshot 2021-12-10 092057](C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\BlackholeRenderer\Renders\Screenshot 2021-12-10 092057.jpg)
+![Screenshot 2021-12-10 092057](https://github.com/greenisfun100/CSC213-FinalProject/blob/main/ReadmeImages/Screenshot%202021-12-10%20092057.jpg)
 
 I solved the projection issues so the disk is flat, then moved the camera slightly above the plane of the disk so that we can see the top of the disk. I also added rings to the accretion disk so the geometry is visible.
 
-![Screenshot 2021-12-10 133611](C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\BlackholeRenderer\Renders\Screenshot 2021-12-10 133611.jpg)
+![Screenshot 2021-12-10 133611](https://github.com/greenisfun100/CSC213-FinalProject/blob/main/ReadmeImages/Screenshot%202021-12-10%20133611.jpg)
 
 A closer view at a smaller step size.
 
-![1000x800-StepSize0.01-4kStarpam(630RT)](C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\BlackholeRenderer\Renders\1000x800-StepSize0.01-4kStarpam(630RT).jpg)
+![1000x800-StepSize0.01-4kStarpam(630RT)](https://github.com/greenisfun100/CSC213-FinalProject/blob/main/ReadmeImages/1000x800-StepSize0.01-4kStarpam(630RT).jpg)
 
 Then I got the celestial sphere working and the accretion disk was no longer the coolest part.
 
-![1280x720](C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\BlackholeRenderer\Renders\1280x720.jpg)
+![1280x720](https://github.com/greenisfun100/CSC213-FinalProject/blob/main/ReadmeImages/1280x720.jpg)
 
 This is using an equirectangular projection of the globe as my input.
 
-![EarthMap](C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\BlackholeRenderer\Renders\EarthMap.png)
+![EarthMap](https://github.com/greenisfun100/CSC213-FinalProject/blob/main/ReadmeImages/EarthMap.png)
 
-![NewStarMap4k](C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\BlackholeRenderer\Renders\NewStarMap4k.png)
+![NewStarMap4k](https://github.com/greenisfun100/CSC213-FinalProject/blob/main/ReadmeImages/NewStarMap4k.png)
 
-![1000x1000-StepSize0.1-4kStarmap(430RT)](C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\BlackholeRenderer\Renders\1000x1000-StepSize0.1-4kStarmap(430RT).jpg)
+![1000x1000-StepSize0.1-4kStarmap(430RT)](https://github.com/greenisfun100/CSC213-FinalProject/blob/main/ReadmeImages/1000x1000-StepSize0.1-4kStarmap(430RT).jpg)
 
 A gif of the camera approaching the blackhole. Notice how the background changes.
 
-![FallingIn](C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\BlackholeRenderer\Renders\Animations\FallingIn.gif)
+![FallingIn](https://github.com/greenisfun100/CSC213-FinalProject/blob/main/BlackholeRenderer/Renders/Animations/FallingIn.gif)
 
 Animation of the camera moving relative to the black hole.
 
-![Final Animation](C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\BlackholeRenderer\Renders\FinalAnimation\Final Animation.gif)
+![Final Animation](https://github.com/greenisfun100/CSC213-FinalProject/blob/main/BlackholeRenderer/Renders/FinalAnimation/Final%20Animation.gif)
 
-Demo.
