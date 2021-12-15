@@ -101,22 +101,22 @@ int main(int argc, char** argv){
 	Args_t* GPU_Args;
 
 	// Define arguments for the simulation
-	CPU_Args->cameraInitPos = {0, 10, 2};
+	CPU_Args->cameraInitPos = {0, 0, 2};
 	CPU_Args->cameraFinPos = { 0, -10, 2 };
 	CPU_Args->cameraDir = { -1, 0, 0 };
 	CPU_Args->cameraUp = { 0, 0, 1 };
 	CPU_Args->cameraRight = { 0, 1, 0 };
 	CPU_Args->globalUp = { 0, 0, 1 };
-	CPU_Args->bhPos = { -20, 0, 0 };
+	CPU_Args->bhPos = { -14, 0, 0 };
 	CPU_Args->initPitch = 0.2;
-	CPU_Args->finPitch = 0.2;
+	CPU_Args->finPitch = 0;
 	CPU_Args->initYaw = 0;
 	CPU_Args->finYaw = 0;
-	CPU_Args->stepSize = 0.2;
+	CPU_Args->stepSize = 0.25;
 	CPU_Args->bhRadius = 3;
 	CPU_Args->rings = 30;
 	CPU_Args->diskThickness = 5;
-	CPU_Args->frames = 100;
+	CPU_Args->frames = 1;
 	CPU_Args->disk = false;
 
 	// Apply some initial conditions
@@ -231,6 +231,7 @@ int main(int argc, char** argv){
 						printf("Camera Position: (%lf, %lf, %lf)\n", CPU_Args->cameraPos.x, CPU_Args->cameraPos.y, CPU_Args->cameraPos.z);
 						printf("Camera Direction: (%lf, %lf, %lf)\n", CPU_Args->cameraDir.x, CPU_Args->cameraDir.y, CPU_Args->cameraDir.z);
 
+						printf("Rendering frame %d of %d\n", i+1, CPU_Args->frames);
 
 						// Copy the cpu's rays to the gpu with cudaMemcpy
 						if (cudaMemcpy(gpu_rays, rays, sizeof(Ray) * SCREEN_HEIGHT * SCREEN_WIDTH, cudaMemcpyHostToDevice) != cudaSuccess) {
@@ -283,7 +284,7 @@ int main(int argc, char** argv){
 
 						// Create the path of the output image
 						char outPath[100];
-						strcpy(outPath, "Renders/");
+						strcpy(outPath, "Renders/FinalAnimation/");
 						strcat(outPath, "Frame_");
 						char number[5];
 						sprintf(number, "%d", i);
@@ -347,7 +348,7 @@ __global__ void propRays(Rgb* gpu_frameBuffer, uint8_t* gpu_rgb_image, Ray* gpu_
 	if (i > SCREEN_WIDTH || j > SCREEN_HEIGHT) return;
 	while (!gpu_rays[j * SCREEN_WIDTH + i].colored){
 
-		// Runge-Kutta 4 Numberical calulation substeps
+		// Runge-Kutta 4 Numerical calulation substeps
 		Result_t k1 = f(gpu_rays[j * SCREEN_WIDTH + i].pos, gpu_rays[j * SCREEN_WIDTH + i].dir, args->bhPos, args->stepSize, args->bhRadius);
 		Result_t k2 = f(VecAdd(gpu_rays[j * SCREEN_WIDTH + i].pos, VecScale(k1.vec, args->stepSize / 2)), gpu_rays[j * SCREEN_WIDTH + i].dir, args->bhPos, args->stepSize, args->bhRadius);
 		Result_t k3 = f(VecAdd(gpu_rays[j * SCREEN_WIDTH + i].pos, VecScale(k2.vec, args->stepSize / 2)), gpu_rays[j * SCREEN_WIDTH + i].dir, args->bhPos, args->stepSize, args->bhRadius);

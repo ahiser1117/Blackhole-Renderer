@@ -81,7 +81,7 @@
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <CudaCompile Include="ImprovedRasterizer.cu" />
+    <CudaCompile Include="BlackholeRenderer.cu" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stb_image.h" />

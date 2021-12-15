@@ -1,0 +1,2 @@
+C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\BlackholeRenderer\x64\Debug\BlackHoleRenderer.exe
+C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\BlackholeRenderer\x64\Debug\BlackHoleRenderer.pdb

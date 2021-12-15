@@ -2,7 +2,7 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\x64\Debug\BlackHoleRenderer.exe</FullPath>
+      <FullPath>C:\Users\alexh\source\repos\CudaRuntimeTesting\CSC213-FinalProject\BlackholeRenderer\x64\Debug\BlackHoleRenderer.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles />
