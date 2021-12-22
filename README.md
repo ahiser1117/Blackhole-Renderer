@@ -1,5 +1,3 @@
-**Note:** Setup instructions included at the end of README.
-
 
 ## Inspiration: Interstellar
 
@@ -225,15 +223,4 @@ A gif of the camera approaching the blackhole. Notice how the background changes
 Animation of the camera moving relative to the black hole.
 
 ![Final Animation](https://github.com/greenisfun100/CSC213-FinalProject/blob/main/BlackholeRenderer/Renders/FinalAnimation/Final%20Animation.gif)
-
-
-## Setup Instructions
-
-In this project I used 3 things that are not built in to C. Firstly, the main file to run is a CUDA .cu file so the computer you run this on must have CUDA installed. I also used SDL to allow me to draw to a window. I got SDL working in Visual Studio Community by using this tutorial: https://lazyfoo.net/tutorials/SDL/01_hello_SDL/windows/msvc2019/index.php
-
-Lastly the STBI files, std_image.h and stb_image_write.h need to be included in the same directory as the file that is being run.
-
-If these are adhered to the program should run fine!
-
-
 
